@@ -2,9 +2,9 @@
 This repository contains a PyTorch implementation reproducing **Figure 2** (Linear Approximation vs. Actual Loss Change) from the paper *Understanding Black-box Predictions via Influence Functions* (Koh & Liang, 2017). 
 
 ## Implementation Details
-- **Method**: Primitive PyTorch implementation (Calculated gradients and Hessian-Vector Products using `autograd`).
-- **Optimizer**: L-BFGS (Ensures strict convergence to the minimum).
-- **Hessian Inverse**: LiSSA (Linear time Stochastic Second-Order Algorithm).
+- **Method**: Primitive PyTorch implementation (Calculated gradients and Hessian-Vector Products using autograd).
+- **Optimizer**: L-BFGS .
+- **Hessian Inverse**: LiSSA .
 - **Dataset**: Binary MNIST (0 vs 1).
 
 ## Files
