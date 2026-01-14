@@ -5,7 +5,7 @@ This repository contains a PyTorch implementation reproducing **Figure 2** (Line
 - **Method**: Primitive PyTorch implementation (Calculated gradients and Hessian-Vector Products using autograd).
 - **Optimizer**: L-BFGS .
 - **Hessian Inverse**: LiSSA .
-- **Dataset**: Binary MNIST (0 vs 1).
+- **Dataset**: Binary MNIST.
 
 ## Files
 - `figure2_linear_approx.py`: Main script to run the experiment and generate the plot.
