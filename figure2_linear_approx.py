@@ -123,7 +123,7 @@ def main():
         influences.append(inf)
     influences = np.array(influences)
 
-    # LOO Retraining
+    # Retraining with point removed
     K = args.num_extremes
     sorted_indices = np.argsort(influences) 
     neg_indices = sorted_indices[:K]
@@ -177,4 +177,5 @@ def main():
 if __name__ == "__main__":
 
     main()
+
 
