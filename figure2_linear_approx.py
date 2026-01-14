@@ -10,7 +10,7 @@ from torchvision import datasets, transforms
 from torch.utils.data import DataLoader, Subset
 from tqdm import tqdm
 
-# model
+# define the model
 class LogisticRegression(nn.Module):
     def __init__(self):
         super().__init__()
@@ -36,7 +36,7 @@ def main():
     
     print(f"Config: N={args.n_train}, L2={args.l2}, Extremes={args.num_extremes}")
 
-    # data prepare
+    # Filter MNIST for Binary Classification
     tfm = transforms.ToTensor()
     dataset = datasets.MNIST("data", train=True, download=True, transform=tfm)
     
@@ -59,7 +59,7 @@ def main():
     x_train_all, y_train_all = next(iter(all_loader))
     x_train_all, y_train_all = x_train_all.to(device), y_train_all.to(device)
 
-    # L-BFGS
+    # train the model with L-BFGS
     def train_with_lbfgs(model, x, y, l2_reg):
         optimizer = torch.optim.LBFGS(
             model.parameters(), 
@@ -84,7 +84,7 @@ def main():
     model = LogisticRegression().to(device)
     train_with_lbfgs(model, x_train_all, y_train_all, args.l2)
 
-    #choose test points
+    #choose the test points
     model.eval()
     z_test = None
     test_loader = DataLoader(test_dataset, batch_size=1, shuffle=True)
@@ -107,7 +107,7 @@ def main():
     base_loss = get_pure_loss(model)
     print(f"Selected Test Point Loss: {base_loss:.4f}")
 
-    #compute Influence
+    #compute influence ussing Lissa
     v = grad_z(model, x_test, y_test)
     s_test = inverse_hvp_lissa(
         model, x_train_all, y_train_all, v, 
@@ -123,7 +123,7 @@ def main():
         influences.append(inf)
     influences = np.array(influences)
 
-    #points
+    # LOO Retraining
     K = args.num_extremes
     sorted_indices = np.argsort(influences) 
     neg_indices = sorted_indices[:K]
@@ -150,7 +150,7 @@ def main():
         loss_new = get_pure_loss(m_loo)
         actual_diffs.append(loss_new - base_loss)
 
-    # picture
+    # get th final picture
     plt.style.use('seaborn-v0_8-whitegrid')
   
     plt.figure(figsize=(5, 5))
@@ -177,3 +177,4 @@ def main():
 if __name__ == "__main__":
 
     main()
+
