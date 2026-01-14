@@ -4,7 +4,7 @@ import torch.nn.functional as F
 def flatten(tensors):
     return torch.cat([t.flatten() for t in tensors])
 
-#pure loss (without regularization)
+#loss on a single training example (no regularization)
 def loss_z(model, x, y):
     logits = model(x.unsqueeze(0)) #the batch dimension
     loss = F.cross_entropy(logits, y.unsqueeze(0), reduction="sum")
@@ -23,17 +23,17 @@ def hvp_z(model, x, y, v, l2=0.0):
     
     params = [p for p in model.parameters() if p.requires_grad]
     
-    # 1. Compute Gradient of Loss
+    # Compute Gradient of Loss
     loss = loss_z(model, x, y)
     grads = torch.autograd.grad(loss, params, create_graph=True)
     g_vec = flatten(grads)
     
-    # 2. Compute Gradient of (Gradient * v) -> H*v
+    # Compute Gradient of (Gradient * v) -> H*v
     gv = (g_vec * v).sum()
     hv = torch.autograd.grad(gv, params)
     hv_vec = flatten(hv).detach() # stop graph growth in LiSSA
     
-    # 3. Add L2 regularization term: H_total = H_loss + l2*I
+    # Add L2 regularization term: H_total = H_loss + l2*I
     # (H_loss + l2*I) * v = H_loss*v + l2*v
     if l2 > 0:
         hv_vec += l2 * v
@@ -55,10 +55,6 @@ def inverse_hvp_lissa(
 ):
     n = x_train.shape[0]
     v = v.detach() 
-
-    # Recursion: s_j = v + (I - H) * s_{j-1}
-    # scaling: s_j = v + (I - H/scale) * s_{j-1}
-    # approximates H^{-1} * v / scale
     
     def one_run():
         s = v.clone()
