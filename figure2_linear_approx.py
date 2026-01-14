@@ -40,12 +40,12 @@ def main():
     tfm = transforms.ToTensor()
     dataset = datasets.MNIST("data", train=True, download=True, transform=tfm)
     
-    idx = (dataset.targets == 0) | (dataset.targets == 1)
+    idx = (dataset.targets == 1) | (dataset.targets == 7)
     dataset.targets = dataset.targets[idx]
     dataset.data = dataset.data[idx]
     
     test_dataset = datasets.MNIST("data", train=False, download=True, transform=tfm)
-    test_idx = (test_dataset.targets == 0) | (test_dataset.targets == 1)
+    test_idx = (test_dataset.targets == 1) | (test_dataset.targets == 7)
     test_dataset.targets = test_dataset.targets[test_idx]
     test_dataset.data = test_dataset.data[test_idx]
 
@@ -177,5 +177,6 @@ def main():
 if __name__ == "__main__":
 
     main()
+
 
 
