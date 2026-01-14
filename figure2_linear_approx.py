@@ -10,7 +10,7 @@ from torchvision import datasets, transforms
 from torch.utils.data import DataLoader, Subset
 from tqdm import tqdm
 
-# 1. model
+# model
 class LogisticRegression(nn.Module):
     def __init__(self):
         super().__init__()
@@ -20,13 +20,13 @@ class LogisticRegression(nn.Module):
         return self.w(x.view(x.size(0), -1))
 
 def main():
-    parser = argparse.ArgumentParser(description="Influence Function Paper Reproduction (Clean)")
-    parser.add_argument("--n_train", type=int, default=12000, help="Training set size")
-    parser.add_argument("--l2", type=float, default=0.01, help="L2 regularization")
-    parser.add_argument("--num_extremes", type=int, default=60, help="Points")
-    parser.add_argument("--seed", type=int, default=42, help="Random seed")
-    parser.add_argument("--ihvp_t", type=int, default=5000, help="LiSSA recursion depth")
-    parser.add_argument("--ihvp_r", type=int, default=5, help="LiSSA repeats")
+    parser = argparse.ArgumentParser(description="Influence Function Paper Reproduction")
+    parser.add_argument("--n_train", type=int, default=12000)
+    parser.add_argument("--l2", type=float, default=0.01)
+    parser.add_argument("--num_extremes", type=int, default=60)
+    parser.add_argument("--seed", type=int, default=42)
+    parser.add_argument("--ihvp_t", type=int, default=5000)
+    parser.add_argument("--ihvp_r", type=int, default=5)
     args = parser.parse_args()
 
     torch.manual_seed(args.seed)
@@ -36,7 +36,7 @@ def main():
     
     print(f"Config: N={args.n_train}, L2={args.l2}, Extremes={args.num_extremes}")
 
-    # 2. data prepare
+    # data prepare
     tfm = transforms.ToTensor()
     dataset = datasets.MNIST("data", train=True, download=True, transform=tfm)
     
@@ -59,7 +59,7 @@ def main():
     x_train_all, y_train_all = next(iter(all_loader))
     x_train_all, y_train_all = x_train_all.to(device), y_train_all.to(device)
 
-    # 3. L-BFGS
+    # L-BFGS
     def train_with_lbfgs(model, x, y, l2_reg):
         optimizer = torch.optim.LBFGS(
             model.parameters(), 
@@ -84,7 +84,7 @@ def main():
     model = LogisticRegression().to(device)
     train_with_lbfgs(model, x_train_all, y_train_all, args.l2)
 
-    # 4. choose test points
+    #choose test points
     model.eval()
     z_test = None
     test_loader = DataLoader(test_dataset, batch_size=1, shuffle=True)
@@ -107,7 +107,7 @@ def main():
     base_loss = get_pure_loss(model)
     print(f"Selected Test Point Loss: {base_loss:.4f}")
 
-    # 5. compute Influence
+    #compute Influence
     v = grad_z(model, x_test, y_test)
     s_test = inverse_hvp_lissa(
         model, x_train_all, y_train_all, v, 
@@ -123,7 +123,7 @@ def main():
         influences.append(inf)
     influences = np.array(influences)
 
-    # 6. points
+    #points
     K = args.num_extremes
     sorted_indices = np.argsort(influences) 
     neg_indices = sorted_indices[:K]
@@ -150,28 +150,23 @@ def main():
         loss_new = get_pure_loss(m_loo)
         actual_diffs.append(loss_new - base_loss)
 
-    # 7. picture
+    # picture
     plt.style.use('seaborn-v0_8-whitegrid')
   
-    # square
     plt.figure(figsize=(5, 5))
   
     max_val = max(np.max(np.abs(pred_diffs)), np.max(np.abs(actual_diffs)))
     if max_val == 0: max_val = 0.1
     mval = max_val * 1.1
     
-    # diagonal
-    plt.plot([-mval, mval], [-mval, mval], color='gray', linestyle='--', alpha=0.5, linewidth=1.5)
+    plt.plot([-mval, mval], [-mval, mval], color='gray', linestyle='--', alpha=0.5, linewidth=1.5)#diagonal
     
-    # points
-    plt.scatter(actual_diffs, pred_diffs, alpha=0.8, color="#4c72b0", s=40, edgecolors='white', linewidth=0.5)
+    plt.scatter(actual_diffs, pred_diffs, alpha=0.8, color="#4c72b0", s=40, edgecolors='white', linewidth=0.5)#points
     
-    # axis
-    plt.xlabel('Actual change in loss', fontsize=12)
+    plt.xlabel('Actual change in loss', fontsize=12)#axis
     plt.ylabel('Predicted change in loss', fontsize=12)
         
-    # same range
-    plt.xlim(-mval, mval)
+    plt.xlim(-mval, mval)# same range
     plt.ylim(-mval, mval)
     
     plt.tight_layout()
@@ -180,4 +175,5 @@ def main():
     plt.savefig(out_path, dpi=300)
 
 if __name__ == "__main__":
+
     main()
