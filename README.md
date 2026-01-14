@@ -12,7 +12,7 @@ This repository contains a PyTorch implementation reproducing **Figure 2** (Line
 - `influence_functions.py`: Core implementation of gradient and HVP calculations.
 
 ## Results
-The reproduction demonstrates a near-perfect linear correlation between the predicted influence and the actual loss change (verified via Leave-One-Out retraining).
+The reproduction demonstrates a near-perfect linear correlation between the predicted influence and the actual loss change.
 
 ## How to Run
 1. Install dependencies:
